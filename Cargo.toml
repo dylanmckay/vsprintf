@@ -3,6 +3,14 @@ name = "vsprintf"
 version = "1.0.0"
 authors = ["Dylan McKay <me@dylanmckay.io>"]
 
+description = "Rust bindings to the libc vsprintf function"
+license = "MIT"
+documentation = "https://docs.rs/vsprintf"
+repository = "https://github.com/dylanmckay/vsprintf"
+readme = "README.md"
+
+keywords = ["vsprintf", "sprintf", "printf", "va_list", "va_arg"]
+
 [dependencies]
 libc = "0.2"
 
