@@ -24,7 +24,14 @@ pub unsafe fn vsprintf<V>(format: *const c_char,
 /// a null-terminated C string.
 pub unsafe fn vsprintf_raw<V>(format: *const c_char,
                               va_list: *mut V) -> Result<Vec<u8>> {
-    let list_ptr = va_list  as *mut c_void;
+    #[cfg(not(windows))]
+    let list_ptr = va_list as *mut c_void;
+    // On Windows `*mut V` isn't correct, it's actually `V`.
+    // 1. transmute `*mut V` to `V`
+    // 2. take a mutable reference: `&mut V`
+    // 3. convert it to `*mut c_void`
+    #[cfg(windows)]
+    let list_ptr = &mut std::mem::transmute_copy::<_, V>(&va_list) as *mut _ as *mut _;
 
     let mut buffer = Vec::new();
     buffer.extend([0u8; INITIAL_BUFFER_SIZE].iter().cloned());
