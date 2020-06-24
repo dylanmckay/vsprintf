@@ -2,6 +2,7 @@
 name = "vsprintf"
 version = "1.0.3"
 authors = ["Dylan McKay <me@dylanmckay.io>"]
+edition = "2018"
 
 description = "Rust bindings to the libc vsprintf function"
 license = "MIT"
