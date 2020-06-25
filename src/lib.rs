@@ -23,14 +23,8 @@ pub unsafe fn vsprintf<V>(format: *const c_char,
 /// Prints a format string into a list of raw bytes that form
 /// a null-terminated C string.
 pub unsafe fn vsprintf_raw<V>(format: *const c_char,
-                              mut va_list: *mut V) -> Result<Vec<u8>> {
-    #[cfg(not(windows))]
-    let list_ptr = va_list as *mut c_void;
-    // On Windows `*mut V` isn't correct, it's actually `V`.
-    // Here we convert `&mut *mut V` to `*mut c_void`, removing one reference
-    // because we are pretending that `va_list` is actually `V`.
-    #[cfg(windows)]
-    let list_ptr = std::mem::transmute::<_, *mut c_void>(&mut va_list);
+                              va_list: *mut V) -> Result<Vec<u8>> {
+    let list_ptr = va_list  as *mut c_void;
 
     let mut buffer = Vec::new();
     buffer.extend([0u8; INITIAL_BUFFER_SIZE].iter().cloned());
