@@ -10,9 +10,9 @@
 int vsnprintf_wrapper(char *buffer,
                       size_t size,
                       const char *format,
-                      va_list *orig_list) {
+                      va_list orig_list) {
   va_list list;
-  va_copy(list, *orig_list);
+  va_copy(list, orig_list);
 
   // C does not require vsprintf to set errno, but POSIX does.
   // Here we clear the errno and so we know that if this function
