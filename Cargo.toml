@@ -1,6 +1,6 @@
 [package]
 name = "vsprintf"
-version = "1.0.2"
+version = "1.0.3"
 authors = ["Dylan McKay <me@dylanmckay.io>"]
 
 description = "Rust bindings to the libc vsprintf function"
