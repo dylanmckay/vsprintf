@@ -20,14 +20,21 @@ pub unsafe fn vsprintf<V>(format: *const c_char,
     })
 }
 
+/// Return a buffer with the given length, filled with arbitrary data.
+fn uninitd_buffer_of_len(len: usize) -> Vec<u8> {
+    let mut buffer = Vec::with_capacity(len);
+    // SAFETY: Any bit pattern is a valid u8.
+    unsafe { buffer.set_len(len) };
+    buffer
+}
+
 /// Prints a format string into a list of raw bytes that form
 /// a null-terminated C string.
 pub unsafe fn vsprintf_raw<V>(format: *const c_char,
                               va_list: *mut V) -> Result<Vec<u8>> {
     let list_ptr = va_list  as *mut c_void;
 
-    let mut buffer = Vec::new();
-    buffer.extend([0u8; INITIAL_BUFFER_SIZE].iter().cloned());
+    let mut buffer = uninitd_buffer_of_len(INITIAL_BUFFER_SIZE);
 
     loop {
         let character_count = vsnprintf_wrapper(
@@ -45,20 +52,19 @@ pub unsafe fn vsprintf_raw<V>(format: *const c_char,
             assert!(character_count >= 0);
             let character_count = character_count as usize;
 
-            let current_max = buffer.len() - 1;
-
             // Check if we had enough room in the buffer to fit everything.
-            if character_count > current_max {
-                let extra_space_required = character_count - current_max;
-
+            // Note that character_count doesn't include the NULL byte, but
+            // neither do we need to reserve space for it since we'll end up
+            // dropping it anyway. (vsnprintf will still print as much as it can,
+            // even if there isn't room for the NULL byte).
+            if character_count > buffer.len() {
                 // Reserve enough space and try again.
-                buffer.extend(repeat(0).take(extra_space_required as usize));
+                buffer = uninitd_buffer_of_len(character_count);
                 continue;
             } else { // We fit everything into the buffer.
                 // Truncate the buffer up until the null terminator.
-                buffer = buffer.into_iter()
-                               .take_while(|&b| b != 0)
-                               .collect();
+                buffer.truncate(character_count);
+                buffer.shrink_to_fit();
                 break;
             }
         }
